@@ -17,7 +17,8 @@ jobs:
     
     - name: 2. Gerar Endereco
       run: |
-        Start-Process -FilePath "ssh" -ArgumentList "-o StrictHostKeyChecking=no -p 443 -R 0:localhost:3389 tcp@a.pinggy.io" -RedirectStandardOutput pinggy.log -RedirectStandardError pinggy.log -WindowStyle Hidden
+        # Separando o arquivo de erro para evitar o bloqueio do PowerShell
+        Start-Process -FilePath "ssh" -ArgumentList "-o StrictHostKeyChecking=no -p 443 -R 0:localhost:3389 tcp@a.pinggy.io" -RedirectStandardOutput pinggy.log -RedirectStandardError pinggy_err.log -WindowStyle Hidden
         Start-Sleep -Seconds 15
         Write-Output "--- DADOS DE CONEXAO ---"
         Select-String -Path pinggy.log -Pattern "tcp://.*"
