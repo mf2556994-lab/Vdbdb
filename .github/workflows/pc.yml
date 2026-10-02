@@ -1,0 +1,29 @@
+name: PC Virtual (Sem Erros)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  start-pc:
+    runs-on: windows-latest
+    steps:
+    - name: 1. Habilitar Acesso RDP
+      run: |
+        $Password = ConvertTo-SecureString "Senha123!" -AsPlainText -Force
+        Set-LocalUser -Name "runneradmin" -Password $Password
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
+    
+    - name: 2. Gerar Endereco
+      run: |
+        Start-Process -FilePath "ssh" -ArgumentList "-o StrictHostKeyChecking=no -p 443 -R 0:localhost:3389 tcp@a.pinggy.io" -RedirectStandardOutput pinggy.log -RedirectStandardError pinggy.log -WindowStyle Hidden
+        Start-Sleep -Seconds 15
+        Write-Output "--- DADOS DE CONEXAO ---"
+        Select-String -Path pinggy.log -Pattern "tcp://.*"
+        Write-Output "Usuario: runneradmin"
+        Write-Output "Senha: Senha123!"
+        
+    - name: 3. Manter Ligado
+      run: ping -t 127.0.0.1 > $null
+      
